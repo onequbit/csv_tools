@@ -1,13 +1,26 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser, BooleanOptionalAction
-from os.path import abspath, basename, isfile
+from os.path import abspath, basename, isfile, split
+import csv
 import sys
 from library import _get_dialect
 
-def get_rows(filename, no_header=False, options=None):
+# def _get_dialect(filename):
+#     with open(filename, newline='') as csvfile:
+#         sniffer = csv.Sniffer()
+#         return sniffer.sniff(csvfile.read(4096))
+
+def has_header(filename):
+    with open(filename, newline='') as csvfile:
+        sniffer = csv.Sniffer()
+        return sniffer.has_header(csvfile.read(4096))
+
+def get_columns(filename):
     import csv
-    row_number = 0
+    if not has_header:
+        raise Exception("no header to read")
+    
     dialect = _get_dialect(filename)
     with open(filename) as csvfile:
         reader = csv.reader(csvfile, dialect)
@@ -37,7 +50,7 @@ class Main:
 
     def run():
         parameters = Main.parsed_cmd_args()
-        rows = get_rows(parameters.filename, no_header=parameters.no_header)
+        rows = get_columns(parameters.filename)
         for row in rows:
             print(row)
             
